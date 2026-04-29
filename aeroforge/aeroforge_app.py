@@ -28,7 +28,7 @@ try:
 except Exception:
     Image = None
 
-app = FastAPI(title="AeroForge+", version="1.2")
+app = FastAPI(title="AeroForge+", version="1.3")
 
 
 @app.get("/")
@@ -45,6 +45,16 @@ def health():
         "app": "AeroForge+",
         "env": os.getenv("AEROFORGE_ENV", "development"),
         "max_iterations": int(os.getenv("AEROFORGE_MAX_ITERATIONS", "1000")),
+    }
+
+
+@app.get("/config")
+def config():
+    return {
+        "name": "AeroForge+",
+        "environment": os.getenv("AEROFORGE_ENV", "development"),
+        "max_iterations": int(os.getenv("AEROFORGE_MAX_ITERATIONS", "1000")),
+        "modes": ["Distance", "Airtime", "Height", "Hybrid"],
     }
 
 
@@ -77,6 +87,11 @@ def safe_round(v: float, digits: int = 2) -> float:
 
 def now_stamp() -> str:
     return datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+
+
+def to_download_url(pdf_path: str) -> str:
+    filename = Path(pdf_path).name
+    return f"/download?path={filename}"
 
 def read_pdf_text(file_bytes: bytes) -> str:
     if PdfReader is None:
@@ -461,6 +476,7 @@ async def optimize_plane(
         "best_metrics": best_metrics,
         "top_candidates": optimization["history_top"],
         "pdf_path": pdf_path,
+        "download_url": to_download_url(pdf_path),
     })
 
 @app.get("/download")

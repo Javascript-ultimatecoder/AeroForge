@@ -11,33 +11,41 @@ python3 -m uvicorn aeroforge_app:app --reload
 
 Open: `http://127.0.0.1:8000`
 
-## Render deploy (Web Service)
+## Render deployment settings
 
-Use a **Web Service** (not Static Site) because this app has FastAPI endpoints.
+### Recommended (Web Service)
+Use **Web Service** because this app has backend API routes.
 
-### Render UI values
-- **Name**: `aeroforge-plus` (or any unique name you want)
-- **Project**: optional (`My project` is fine)
+- **Name**: `aeroforge-plus` (must be unique)
+- **Project**: `My project` (optional)
 - **Environment**: `Production`
-- **Branch**: your deployment branch (for example `main`)
+- **Branch**: `main` (or your deploy branch)
 - **Root Directory**: `aeroforge`
 - **Build Command**: `pip install -r requirements.txt`
 - **Start Command**: `python3 -m uvicorn aeroforge_app:app --host 0.0.0.0 --port $PORT`
+- **Environment Variables**:
+  - `AEROFORGE_ENV=production`
+  - `AEROFORGE_MAX_ITERATIONS=1000`
 
-> If you choose **Static Site** in Render, this backend API will not run.
+### If you still choose Static Site in Render UI
+This backend will not run there, but for your form fields:
 
-## Environment variables
-Set these in Render:
+- **Name**: `aeroforge-plus-ui` (unique)
+- **Project**: `My project` (optional)
+- **Environment**: `Production`
+- **Branch**: `main`
+- **Root Directory**: `aeroforge`
+- **Build Command**: `echo "Static export not configured"`
+- **Publish Directory**: `./`
+- **Environment Variables**: optional for static assets only
 
-- `AEROFORGE_ENV=production`
-- `AEROFORGE_MAX_ITERATIONS=1000`
+## API
+- `GET /` UI
+- `GET /health` runtime health
+- `GET /config` runtime config for frontend
+- `POST /optimize` optimize and generate report PDF
+- `GET /download?path=<filename>` download generated report
 
-You can also copy `.env.example`.
-
-## Health check
-
-`GET /health` returns runtime env + iteration cap.
-
-## Optional infra-as-code
-
-A `render.yaml` is included in this folder for blueprint-based setup.
+## Notes
+- `POST /optimize` now returns `download_url` so the frontend can avoid path handling conflicts.
+- A `render.yaml` file is included for blueprint deploys.

@@ -49,7 +49,7 @@ async function runOptimize(){
   if(data.pdf_path){
     const a = document.getElementById('download');
     a.style.display='inline';
-    a.href=`/download?path=${encodeURIComponent(data.pdf_path)}`;
+    a.href = data.download_url || `/download?path=${encodeURIComponent((data.pdf_path||"" ).split("/").pop())}`;
   }
   document.getElementById('status').innerText='Done';
 }
