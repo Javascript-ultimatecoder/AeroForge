@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AeroForge+</title>
+  <style>
+    body { font-family: Inter, Arial, sans-serif; margin: 0; background: #0a0d14; color: #f5f7ff; }
+    .wrap { max-width: 860px; margin: 0 auto; padding: 20px; }
+    .card { background: #141a26; border: 1px solid #28324a; border-radius: 14px; padding: 16px; margin-bottom: 14px; }
+    input, select, button { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #3a4666; background: #0f1422; color: #fff; }
+    button { background: linear-gradient(90deg,#6e8bff,#8b5dff); border: none; font-weight: 600; }
+    pre { white-space: pre-wrap; word-wrap: break-word; }
+    .row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    @media (max-width: 640px){ .row { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>✈️ AeroForge+</h1>
+  <div class="card">
+    <input type="file" id="file" accept=".pdf,.png,.jpg,.jpeg,.webp" />
+    <div class="row" style="margin-top:10px;">
+      <select id="mode"><option>Distance</option><option>Airtime</option><option>Height</option><option>Hybrid</option></select>
+      <input id="iterations" type="number" value="120" min="10" max="1000" />
+    </div>
+    <label style="display:block;margin:10px 0;"><input id="extreme" type="checkbox" style="width:auto;"/> Extreme mode</label>
+    <button onclick="runOptimize()">Optimize</button>
+    <p id="status"></p>
+  </div>
+  <div class="card">
+    <a id="download" style="display:none;color:#9bb2ff;" target="_blank">Download PDF Report</a>
+    <pre id="out">Ready.</pre>
+  </div>
+</div>
+<script>
+async function runOptimize(){
+  const f = document.getElementById('file').files[0];
+  if(!f){ alert('Choose a file first'); return; }
+  const form = new FormData();
+  form.append('file', f);
+  form.append('mode', document.getElementById('mode').value);
+  form.append('extreme_mode', document.getElementById('extreme').checked);
+  form.append('iterations', document.getElementById('iterations').value);
+  document.getElementById('status').innerText='Optimizing...';
+  const res = await fetch('/optimize',{method:'POST', body: form});
+  const data = await res.json();
+  document.getElementById('out').innerText = JSON.stringify(data,null,2);
+  if(data.pdf_path){
+    const a = document.getElementById('download');
+    a.style.display='inline';
+    a.href=`/download?path=${encodeURIComponent(data.pdf_path)}`;
+  }
+  document.getElementById('status').innerText='Done';
+}
+</script>
+</body>
+</html>
