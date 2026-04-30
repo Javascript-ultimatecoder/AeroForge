@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AeroForge+ v3+</title>
+<style>
+body{background:#0f1222;color:#fff;font-family:Inter,sans-serif;margin:0}
+.wrap{max-width:940px;margin:0 auto;padding:20px}
+.card{background:#171d35;border:1px solid #2f447a;border-radius:14px;padding:16px;margin-bottom:14px}
+button,input{width:100%;padding:12px;border-radius:10px;border:1px solid #3f5796;background:#101930;color:#fff}
+button{background:linear-gradient(90deg,#4b8fff,#915dff);border:none;font-weight:700}
+img{width:100%;display:none;margin-top:10px;border-radius:10px;border:1px solid #334875}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>✈️ AeroForge+ v3+</h1>
+<div class="card">
+<input type="file" id="file" accept="image/*"><br><br>
+<button onclick="run()">Analyze</button>
+<div id="status"></div>
+</div>
+<pre id="output"></pre>
+<img id="g1"><img id="g2">
+<a id="pdf" style="display:none;color:#9fb8ff" target="_blank">Download PDF</a>
+</div>
+<script>
+async function run(){
+  const file = document.getElementById('file').files[0];
+  if(!file){ alert('Upload file'); return; }
+  document.getElementById('status').innerText = 'Running...';
+  const form = new FormData(); form.append('file', file);
+  const res = await fetch('/optimize', {method:'POST', body:form});
+  const data = await res.json();
+  document.getElementById('status').innerText = 'Done';
+  document.getElementById('output').innerText = JSON.stringify(data,null,2);
+  const g1=document.getElementById('g1'); const g2=document.getElementById('g2');
+  g1.src=data.graphs[0]; g2.src=data.graphs[1]; g1.style.display='block'; g2.style.display='block';
+  const pdf=document.getElementById('pdf'); pdf.href=data.pdf; pdf.style.display='inline';
+}
+</script>
+</body>
+</html>
