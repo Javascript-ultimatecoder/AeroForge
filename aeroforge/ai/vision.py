@@ -1,7 +1,12 @@
-import cv2
 import numpy as np
 
+
 def detect_plane(file_bytes):
+    try:
+        import cv2
+    except Exception:
+        return {'edges': False, 'contours': 0, 'warning': 'opencv not installed in runtime'}
+
     arr = np.frombuffer(file_bytes, np.uint8)
     img = cv2.imdecode(arr, 1)
     if img is None:

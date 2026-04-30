@@ -1,5 +1,5 @@
 import os
-from fastapi import APIRouter, File, UploadFile
+from fastapi import APIRouter, File, UploadFile, HTTPException
 from fastapi.responses import FileResponse
 
 from core.analysis import analyze_design
@@ -14,6 +14,8 @@ router = APIRouter()
 @router.post('/optimize')
 async def optimize(file: UploadFile = File(...), user: str = 'guest'):
     data = await file.read()
+    if not data:
+        raise HTTPException(status_code=400, detail='empty upload')
     analysis = analyze_design(data, file.filename or 'upload', 'Hybrid')
     result = optimize_design(analysis['baseline_design'])
     graph = generate_graph(result['history'])
@@ -30,5 +32,5 @@ async def optimize(file: UploadFile = File(...), user: str = 'guest'):
 def download(file: str):
     path = os.path.join('aeroforge', 'outputs', os.path.basename(file))
     if not os.path.exists(path):
-        return {'error': 'file not found'}
+        raise HTTPException(status_code=404, detail='file not found')
     return FileResponse(path)
